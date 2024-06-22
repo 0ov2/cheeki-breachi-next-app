@@ -23,7 +23,7 @@ interface PlayerDetails {
   kd: string;
 }
 
-const TTL = 1000 * 60 * 5; // 5 minutes
+const TTL = 1000 * 60 * 60; // 5 minutes
 
 export async function getPlayerNames(): Promise<string[]> {
   const cacheKey = "playerNames";
