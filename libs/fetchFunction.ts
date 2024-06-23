@@ -29,7 +29,7 @@ export async function getPlayerNames(): Promise<string[]> {
   const cacheKey = "playerNames";
   const cachedPlayerNames = getCache<string[]>(cacheKey);
   if (cachedPlayerNames) return cachedPlayerNames;
-
+  
   try {
     const response = await fetch("https://api.vrmasterleague.com/Teams/yajg_EC-gHj7I67wy7E5fA2", {
       cache: "force-cache",
@@ -53,8 +53,7 @@ export async function getBreacherPlayerDetails(playerName: string): Promise<Brea
   if (cachedPlayer !== null) return cachedPlayer;
 
   try {
-    console.log(`Fetching details for player: ${playerName}`);
-    const response = await fetch(`/api?playerName=${playerName}`, {
+    const response = await fetch(`https://vjcrzorbaj4owurvizrlvt3t6i0hohgr.lambda-url.eu-west-2.on.aws/?playerName=${playerName}`, {
       cache: "force-cache",
     });
     if (!response.ok) {
