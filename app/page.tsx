@@ -5,6 +5,8 @@ import { getCache, setCache } from "@/libs/cache"
 import { getBreacherPlayerDetails, getPlayerNames } from "../libs/fetchFunction"
 import { useEffect, useState } from "react"
 
+import CircularProgress from '@mui/material/CircularProgress';
+import { styled } from "@mui/system"
 interface PlayerDetails {
   rank: string
   playerName: string
@@ -13,7 +15,7 @@ interface PlayerDetails {
 
 async function getFilteredPlayerDetails(): Promise<{ playerName: string; id: string }[]> {
   //
-  //  Get the player names for Cheeki Breachi, we can use the public VRML API to get this information 
+  //  Get the player names for Cheeki Breachi, we can use the public VRML API to get this information
   const playerNames = await getPlayerNames()
   //
   //  Now get some player details which we can use to get more specific information later on
@@ -30,14 +32,14 @@ async function getFilteredPlayerDetails(): Promise<{ playerName: string; id: str
 }
 
 const fetchPlayerData = async (playerId: string, playerName: string): Promise<PlayerDetails | null> => {
-  const TTL = 1000 * 60 * 60; // 60 minutes
+  const TTL = 1000 * 60 * 60 // 60 minutes
 
   //
   //  First check if we have cached data for this player and return the data if we do
-  const cacheKey = `breacherPlayerData_${playerName}`;
-  const cachedPlayer = getCache<PlayerDetails | null>(cacheKey);
+  const cacheKey = `breacherPlayerData_${playerName}`
+  const cachedPlayer = getCache<PlayerDetails | null>(cacheKey)
   if (cachedPlayer) {
-    return cachedPlayer;
+    return cachedPlayer
   }
 
   //
@@ -47,31 +49,31 @@ const fetchPlayerData = async (playerId: string, playerName: string): Promise<Pl
     {
       cache: "force-cache",
     }
-  );
+  )
 
   //
   //  Throw an error if we can rate-limited
   if (response.status === 429) {
-    throw new Error("Rate limit exceeded");
+    throw new Error("Rate limit exceeded")
   }
   //
-  //  Process the data got from the response 
-  const playerData = await response.json();
-  const playerKD = await calculateKillDeathRatio(playerData);
-  const playerRank = getPlayerRank(playerData);
+  //  Process the data got from the response
+  const playerData = await response.json()
+  const playerKD = await calculateKillDeathRatio(playerData)
+  const playerRank = getPlayerRank(playerData)
   const playerDetails = {
     rank: playerRank,
     playerName: playerName,
     kd: playerKD.toString(),
-  };
+  }
 
   //
   //  Set the cache for next time
-  setCache(cacheKey, playerDetails, TTL);
+  setCache(cacheKey, playerDetails, TTL)
   //
   //  Return the data for next steps
-  return playerDetails;
-};
+  return playerDetails
+}
 
 function getPlayerRank(data: any) {
   try {
@@ -107,56 +109,73 @@ async function calculateKillDeathRatio(data: any): Promise<number> {
 
 const playerRow = (playerStats: PlayerDetails, index: number) => {
   return (
-    <div key={index} className="player-row w-full flex justify-between items-center">
-      <div className="min-w-[144px] flex items-center">
-        <span>{playerStats.playerName}</span>
+    <div key={index} className="flex justify-between items-center p-4 border-b border-gray-200">
+      <div className="flex items-center">
+        <div className="text-lg font-semibold text-[#a9b9d4]">{playerStats.playerName}</div>
       </div>
-      <div className="min-w-[144px] flex items-center">
-        <span>{playerStats.rank}</span>
-      </div>
-      <div className="min-w-[144px] flex items-center">
-        <span>{playerStats.kd}</span>
+      <div className="flex items-center space-x-8">
+        <div className="text-[#a9b9d4]">{playerStats.rank}</div>
+        <div className="text-[#a9b9d4]">{playerStats.kd}</div>
       </div>
     </div>
   )
 }
 
+const LoadingContainer = styled("div")({
+  width: "100%",
+  textAlign: "center",
+  padding: "1rem",
+})
+
 export default function Home() {
   const [stats, setStats] = useState<PlayerDetails[]>([])
   const [error, setError] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const leaderboardValues = await getFilteredPlayerDetails();
+        const leaderboardValues = await getFilteredPlayerDetails()
         const statsPromises = leaderboardValues.map(async (leaderboardValue, index) => {
           //
-          // Adding delay to avoid rate limit, can adjust this value 
-          await new Promise((resolve) => setTimeout(resolve, index * 500));
-          return fetchPlayerData(leaderboardValue.id, leaderboardValue.playerName);
-        });
+          // Adding delay to avoid rate limit, can adjust this value
+          await new Promise(resolve => setTimeout(resolve, index * 500))
+          return fetchPlayerData(leaderboardValue.id, leaderboardValue.playerName)
+        })
         //
         //  Ensure all requests are waited for
-        const stats = await Promise.all(statsPromises);
+        const stats = await Promise.all(statsPromises)
 
         //
         //  Update our state with the players data
-        setStats(stats.filter((stat): stat is PlayerDetails => stat !== null));
+        setStats(stats.filter((stat): stat is PlayerDetails => stat !== null))
+        setLoading(false)
       } catch (err) {
-        setError(err);
+        setError(err)
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-[2rem] sm:p-[4rem] md:p-[6rem]">
-      <div className="content-container w-full">
-        <div className="content-header w-full flex justify-center">
-          <h1 className="text-[25px] sm:text-[30px]">Cheeki Tracker</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-[#40537a] text-white">
+      <div className="content-container w-full max-w-3xl">
+        <div className="content-header w-full flex justify-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold">Cheeki Tracker</h1>
         </div>
-        <div className="leaderboard-container">{stats.map((stat, index) => playerRow(stat, index))}</div>
+        <div className="leaderboard-container bg-gray-800 rounded-lg shadow-lg">
+          {loading ? (
+            <LoadingContainer>
+              <CircularProgress color="secondary" />
+            </LoadingContainer>
+          ) : (
+            <div className="leaderboard-container bg-gray-800 rounded-lg shadow-lg">
+              {stats.map((stat, index) => playerRow(stat, index))}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   )
