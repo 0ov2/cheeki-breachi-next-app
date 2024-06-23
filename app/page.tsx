@@ -72,7 +72,7 @@ async function calculateKillDeathRatio(data: any): Promise<number> {
 
 const playerRow = (playerStats: PlayerDetails, index: number) => {
   return (
-    <div className="player-row w-full flex justify-between items-center">
+    <div key={index} className="player-row w-full flex justify-between items-center">
       <div className="min-w-[144px] flex justify-center items-center">
         <span>{playerStats.playerName}</span>
       </div>

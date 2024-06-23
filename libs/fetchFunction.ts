@@ -23,7 +23,7 @@ interface PlayerDetails {
   kd: string;
 }
 
-const TTL = 1000 * 60 * 60; // 5 minutes
+const TTL = 1000 * 60 * 60; // 60 minutes
 
 export async function getPlayerNames(): Promise<string[]> {
   const cacheKey = "playerNames";
@@ -53,7 +53,8 @@ export async function getBreacherPlayerDetails(playerName: string): Promise<Brea
   if (cachedPlayer !== null) return cachedPlayer;
 
   try {
-    const response = await fetch(`https://breacherstracker.com/api/players/search/${playerName}`, {
+    console.log(`Fetching details for player: ${playerName}`);
+    const response = await fetch(`/api?playerName=${playerName}`, {
       cache: "force-cache",
     });
     if (!response.ok) {
@@ -68,3 +69,4 @@ export async function getBreacherPlayerDetails(playerName: string): Promise<Brea
     return null;
   }
 }
+
