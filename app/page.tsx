@@ -5,12 +5,13 @@ import { getCache, setCache } from "@/libs/cache"
 import { getBreacherPlayerDetails, getPlayerNames } from "../libs/fetchFunction"
 import { useEffect, useState } from "react"
 
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress"
 import { styled } from "@mui/system"
 interface PlayerDetails {
   rank: string
   playerName: string
   kd: string
+  dateInserted?: Date
 }
 
 async function getFilteredPlayerDetails(): Promise<{ playerName: string; id: string }[]> {
@@ -165,16 +166,19 @@ export default function Home() {
         <div className="content-header w-full flex justify-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold">Cheeki Tracker</h1>
         </div>
-        <div className="leaderboard-container bg-gray-800 rounded-lg shadow-lg">
-          {loading ? (
-            <LoadingContainer>
-              <CircularProgress color="secondary" />
-            </LoadingContainer>
-          ) : (
-            <div className="leaderboard-container bg-gray-800 rounded-lg shadow-lg">
-              {stats.map((stat, index) => playerRow(stat, index))}
-            </div>
-          )}
+        {loading ? (
+          <LoadingContainer>
+            <CircularProgress color="secondary" />
+          </LoadingContainer>
+        ) : null}
+        <div
+          className={`leaderboard-container bg-gray-800 rounded-lg shadow-lg transition-all duration-500 ${
+            loading ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          {!loading ? (
+            <div className="leaderboard-content">{stats.map((stat, index) => playerRow(stat, index))}</div>
+          ) : null}
         </div>
       </div>
     </main>
