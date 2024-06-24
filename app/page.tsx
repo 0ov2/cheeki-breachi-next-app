@@ -10,6 +10,7 @@ import { styled } from "@mui/system"
 interface PlayerDetails {
   rank: string
   playerName: string
+  breachersTrackerID: string
   kd: string
   dateInserted?: Date
 }
@@ -64,6 +65,7 @@ const fetchPlayerData = async (playerId: string, playerName: string): Promise<Pl
   const playerRank = getPlayerRank(playerData)
   const playerDetails = {
     rank: playerRank,
+    breachersTrackerID: playerId,
     playerName: playerName,
     kd: playerKD.toString(),
   }
@@ -112,7 +114,15 @@ const playerRow = (playerStats: PlayerDetails, index: number) => {
   return (
     <div key={index} className="flex justify-between items-center p-4 border-b border-gray-200">
       <div className="flex items-center">
-        <div className="text-lg font-semibold text-[#a9b9d4]">{playerStats.playerName}</div>
+        <div className="text-lg font-semibold text-[#a9b9d4]">
+          <a
+            href={`https://breacherstracker.com/profile/${playerStats.breachersTrackerID}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <p>{playerStats.playerName}</p>
+          </a>
+        </div>
       </div>
       <div className="flex items-center space-x-8">
         <div className="text-[#a9b9d4]">{playerStats.rank}</div>
