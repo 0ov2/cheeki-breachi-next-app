@@ -101,9 +101,9 @@ async function calculateKillDeathRatio(data: any): Promise<number> {
     if (totalDeaths === 0) {
       return totalKills
     }
+    const kdRatio = totalKills / totalDeaths;
 
-    let shiftedNum = Math.floor((totalKills / totalDeaths) * 100)
-    return shiftedNum / 100
+    return Math.round((kdRatio + Number.EPSILON) * 100) / 100;
   } catch (error) {
     console.error("Error calculating K/D ratio:", error)
     return 0
